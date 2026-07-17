@@ -1,0 +1,59 @@
+
+const ProductosModel = require('../models/productos');
+
+const productosController = {
+    listarProductos: async (req, res) => {
+        try {
+            const productos = await ProductosModel.obtenerTodos();
+            res.status(200).json(productos); // 200 OK + Payload JSON
+        } catch (error) {
+            console.error('Error en listarProductos:', error);
+            res.status(500).json({ error: 'Error interno al obtener los productos' });
+        }
+    },
+
+    crearProducto: async (req, res) => {
+        const { nombre, precio, stock } = req.body;
+
+        // Validación básica de negocio
+        if (!nombre || !precio || stock === undefined) {
+            return res.status(400).json({ error: 'Faltan campos obligatorios: nombre, precio o stock' });
+        }
+
+        try {
+            const nuevoId = await ProductosModel.crear(req.body);
+            res.status(201).json({ 
+                success: true, 
+                mensaje: 'Producto registrado exitosamente', 
+                id: nuevoId 
+            }); // 201 Created
+        } catch (error) {
+            console.error('Error en crearProducto:', error);
+            res.status(500).json({ error: 'Error interno al registrar el producto' });
+        }
+    },
+
+    modificarStock: async (req, res) => {
+        const { id } = req.params;
+        const { nuevoStock } = req.body;
+
+        if (nuevoStock === undefined || nuevoStock < 0) {
+            return res.status(400).json({ error: 'El stock proporcionado es inválido' });
+        }
+
+        try {
+            const productoExistente = await ProductosModel.obtenerPorId(id);
+            if (!productoExistente) {
+                return res.status(404).json({ error: 'El producto no existe en el catálogo' }); // 404 Not Found
+            }
+
+            await ProductosModel.actualizarStock(id, nuevoStock);
+            res.status(200).json({ success: true, mensaje: 'Stock actualizado correctamente' });
+        } catch (error) {
+            console.error('Error en modificarStock:', error);
+            res.status(500).json({ error: 'Error interno al actualizar el inventario' });
+        }
+    }
+};
+
+module.exports = productosController;
