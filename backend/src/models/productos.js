@@ -27,6 +27,12 @@ const ProductosModel = {
             [nuevoStock, id]
         );
         return result.affectedRows > 0;
+    },
+
+    actualizarCampos: async (id, datos) => {
+        const { nombre, precio, stock, categoria } = datos;
+        const sql = `UPDATE productos SET nombre = ?, precio = ?, stock = ?, categoria = ? WHERE id = ?`;
+        return await db.query(sql, [nombre, precio, stock, categoria, id]);
     }
 };
 

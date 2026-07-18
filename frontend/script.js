@@ -42,7 +42,9 @@ function actualizarIU(categoriaBuscada = 'Todas') {
 
     let filtrados = categoriaBuscada !== 'Todas' ? db.filter(i => (i.categoria || 'Abarrotes') === categoriaBuscada) : db;
     tbody.innerHTML = '';
+    
     filtrados.forEach(i => {
+        // Aseguramos pasar el ID entre comillas simples en el onclick por si es un string o hash
         tbody.innerHTML += `<tr class="align-middle">
             <td class="text-center p-2"><img src="${i.img || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=100'}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px; border: 1px solid #dee2e6;"></td>
             <td class="p-2">
@@ -56,8 +58,8 @@ function actualizarIU(categoriaBuscada = 'Todas') {
             <td class="p-2 text-center"><input type="number" id="edit-stock-${i.id}" class="form-control text-center border-secondary fw-bold" value="${i.stock}"></td>
             <td class="p-2 text-center">
                 <div class="d-flex gap-1 justify-content-center">
-                    <button class="btn btn-sm btn-dark fw-bold w-50" onclick="guardarEdicionCompleta(${i.id})">Guardar</button>
-                    <button class="btn btn-sm btn-outline-danger fw-bold w-50" onclick="eliminarProducto(${i.id})">Eliminar</button>
+                    <button class="btn btn-sm btn-dark fw-bold w-50" onclick="guardarEdicionCompleta('${i.id}')">Guardar</button>
+                    <button class="btn btn-sm btn-outline-danger fw-bold w-50" onclick="eliminarProducto('${i.id}')">Eliminar</button>
                 </div>
             </td>
         </tr>`;
@@ -67,11 +69,42 @@ function actualizarIU(categoriaBuscada = 'Todas') {
 function filtrarTabla() { actualizarIU(document.getElementById('filtroCategoria').value); }
 
 async function guardarEdicionCompleta(id) {
-    const data = { nombre: document.getElementById(`edit-nombre-${id}`).value, precio: parseFloat(document.getElementById(`edit-precio-${id}`).value), stock: parseInt(document.getElementById(`edit-stock-${id}`).value), categoria: document.getElementById(`edit-categoria-${id}`).value.toLowerCase().trim() };
-    await fetch(`${API_URL}/productos/${id}`, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
-    cargarProductos();
-}
+    try {
+        const nombreInput = document.getElementById(`edit-nombre-${id}`).value;
+        const precioInput = parseFloat(document.getElementById(`edit-precio-${id}`).value);
+        const stockInput = parseInt(document.getElementById(`edit-stock-${id}`).value);
+        const categoriaInput = document.getElementById(`edit-categoria-${id}`).value.toLowerCase().trim();
 
+        const data = { 
+            nombre: nombreInput, 
+            precio: precioInput, 
+            stock: stockInput, 
+            categoria: categoriaInput 
+        };
+
+        console.log("Enviando actualización para ID:", id, data);
+
+        const response = await fetch(`${API_URL}/productos/${id}`, { 
+            method: 'PUT', 
+            headers: {
+                'Content-Type': 'application/json'
+            }, 
+            body: JSON.stringify(data) 
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error en el servidor: ${response.status} ${response.statusText}`);
+        }
+
+        alert("¡Producto actualizado con éxito!");
+        
+        await cargarProductos(); 
+
+    } catch (error) {
+        console.error('Error al guardar la edición:', error);
+        alert("No se pudo guardar el cambio. Revisa la consola.");
+    }
+}
 async function guardarNuevoProducto() {
     const data = { nombre: document.getElementById('nuevoNombre').value, precio: parseFloat(document.getElementById('nuevoPrecio').value), stock: parseInt(document.getElementById('nuevoStock').value), categoria: document.getElementById('nuevaCategoria').value || 'abarrotes', img: document.getElementById('nuevaImg').value || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=100' };
     await fetch(`${API_URL}/productos`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });

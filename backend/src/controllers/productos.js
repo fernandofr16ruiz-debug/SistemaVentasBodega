@@ -15,7 +15,6 @@ const productosController = {
     crearProducto: async (req, res) => {
         const { nombre, precio, stock } = req.body;
 
-        // Validación básica de negocio
         if (!nombre || !precio || stock === undefined) {
             return res.status(400).json({ error: 'Faltan campos obligatorios: nombre, precio o stock' });
         }
@@ -52,6 +51,32 @@ const productosController = {
         } catch (error) {
             console.error('Error en modificarStock:', error);
             res.status(500).json({ error: 'Error interno al actualizar el inventario' });
+        }
+    },
+
+    actualizarProducto: async (req, res) => {
+        const { id } = req.params;
+        const { nombre, precio, stock, categoria } = req.body;
+
+        // Validación básica de campos
+        if (!nombre || precio === undefined || stock === undefined) {
+            return res.status(400).json({ error: 'Nombre, precio y stock son campos obligatorios.' });
+        }
+
+        try {
+            const productoExistente = await ProductosModel.obtenerPorId(id);
+            if (!productoExistente) {
+                return res.status(404).json({ error: 'El producto no existe en el catálogo' });
+            }
+
+            // Llamamos al modelo para actualizar todos los campos correspondientes
+            // Nota: Asegúrate de que tu ProductosModel tenga este método implementado (Paso 3)
+            await ProductosModel.actualizarCampos(id, { nombre, precio, stock, categoria });
+            
+            res.status(200).json({ success: true, mensaje: 'Producto actualizado completamente' });
+        } catch (error) {
+            console.error('Error en actualizarProducto:', error);
+            res.status(500).json({ error: 'Error interno al actualizar el producto' });
         }
     }
 };

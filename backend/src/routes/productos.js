@@ -5,6 +5,8 @@ const productosController = require('../controllers/productos');
 
 router.get('/', productosController.listarProductos);       // GET /api/productos
 router.post('/', productosController.crearProducto);       // POST /api/productos
-router.put('/:id/stock', productosController.modificarStock); // PUT /api/productos/:id/stock
+router.put('/:id/stock', productosController.modificarStock); // PUT /api/productos/id/stock
+
+router.put('/:id', productosController.actualizarProducto); // PUT /api/productos/:id
 
 module.exports = router;
