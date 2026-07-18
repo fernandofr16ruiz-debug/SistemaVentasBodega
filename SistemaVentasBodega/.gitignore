@@ -1,0 +1,9 @@
+backend/node_modules/
+backend/.env
+db_data/
+.vscode/
+.DS_Store
+Thumbs.db
+evaluar-proyecto.md
+reporte-refactorizacion.md
+resumen-contexto-sistemaVentasBodega.md

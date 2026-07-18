@@ -1,0 +1,36 @@
+services:
+
+  base_datos:
+    image: mysql:8.0
+    container_name: bodega_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_segura # Contraseña maestra de la DB
+      MYSQL_DATABASE: bodega_bd                # Nombre de tu base de datos actual
+      MYSQL_USER: desarrollador_bodega          # El usuario que usará tu backend
+      MYSQL_PASSWORD: bodega_password_123      # Contraseña para el desarrollador
+    ports:
+      - "3306:3306"                            # Expone MySQL para DBeaver
+    volumes:
+      - ./db_data:/var/lib/mysql               # Respaldo físico de tus datos en tu Fedora
+      - ./backend/config/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  backend:
+    image: node:20-alpine
+    container_name: bodega_backend
+    restart: always
+    working_dir: /usr/src/app
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3000:3000"                            # Mapea tu puerto PORT=3000 hacia tu Fedora
+    environment:
+      - PORT=3000
+      - DB_HOST=base_datos                     # Nombre del servicio de arriba para que se comuniquen
+      - DB_USER=desarrollador_bodega
+      - DB_PASSWORD=bodega_password_123
+      - DB_NAME=bodega_bd
+    volumes:
+      - ./backend:/usr/src/app                 # Sincroniza tu código de Node en tiempo real
+      - /usr/src/app/node_modules              # ◄ AÑADIDO: Protege los módulos internos de Docker
+    depends_on:
+      - base_datos                             # Espera a que la DB esté lista para arrancar

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Módulo de Caja | Sistema Bodega</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .pantalla-digital { background-color: #111; border: 4px solid #343a40; border-radius: 8px; box-shadow: inset 0 0 15px rgba(0,0,0,0.8); }
+        .texto-digital { font-family: 'Courier New', Courier, monospace; text-shadow: 0 0 5px rgba(25, 135, 84, 0.5); }
+        .boton-industrial { border-bottom: 4px solid rgba(0,0,0,0.3) !important; transition: all 0.1s; }
+        .boton-industrial:active { border-bottom: 0px !important; transform: translateY(4px); }
+        .visor-imagen { background: repeating-linear-gradient(45deg, #f8f9fa, #f8f9fa 10px, #ffffff 10px, #ffffff 20px); }
+        .tabla-contenedor { max-height: 280px; overflow-y: auto; border: 2px solid #343a40; }
+    </style>
+</head>
+<body onload="verificarAlertas()" style="background-color: #dbe0e5;">
+    
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand text-uppercase fw-bold" href="index.html">SISTEMA BODEGA PRO - TERMINAL 01</a>
+            <div class="d-flex align-items-center">
+                <span class="text-light me-4 small fw-bold" id="nombre-operador">Iniciando...</span>
+                <button class="btn btn-danger rounded-0 fw-bold btn-sm shadow-sm" onclick="cerrarSesion()">Cerrar Sesión / Bloquear Caja</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4">
+        <div id="contenedor-alertas"></div>
+
+        <div class="row g-4">
+            <!-- PANEL DE OPERACIONES (IZQUIERDA) -->
+            <div class="col-lg-7">
+                <div class="card rounded-0 border-dark shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white rounded-0 fw-bold text-uppercase">
+                        Panel de Operaciones (POS)
+                    </div>
+                    <div class="card-body p-4 bg-white">
+                        
+                        <div class="mb-4 position-relative">
+                            <label class="form-label fw-bold text-secondary text-uppercase small">Escáner / Buscador de Artículo:</label>
+                            <input type="text" id="nombreInput" class="form-control form-control-lg border-dark rounded-0 fw-bold shadow-sm" style="font-size: 1.5rem;" oninput="mostrarSugerencias()" placeholder="Escriba el nombre del producto..." autocomplete="off" autofocus>
+                            <div id="cajaSugerencias" class="list-group position-absolute w-100 shadow-lg" style="z-index: 1000; display: none; border-radius: 0; border: 2px solid #343a40;"></div>
+                        </div>
+                        
+                        <div class="row mb-4 align-items-end g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-secondary text-uppercase small">Cantidad (Unid.):</label>
+                                <div class="input-group input-group-lg shadow-sm">
+                                    <span class="input-group-text bg-dark text-white rounded-0 border-dark fw-bold">X</span>
+                                    <input type="number" id="cantInput" class="form-control text-center border-dark rounded-0 fw-bold" value="1" min="1" oninput="calcularVistaPrevia()">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold text-danger text-uppercase small">Aplicar Descuento (%):</label>
+                                <div class="input-group input-group-lg shadow-sm">
+                                    <span class="input-group-text bg-danger text-white rounded-0 border-danger fw-bold">%</span>
+                                    <input type="number" id="descInput" class="form-control text-center border-danger text-danger rounded-0 fw-bold" value="0" min="0" max="100" oninput="calcularVistaPrevia()">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <!-- Cambiado a agregar al carrito -->
+                                <button class="btn btn-primary btn-lg w-100 rounded-0 fw-bold text-uppercase boton-industrial py-3" onclick="agregarAlCarrito()">
+                                    <span class="d-block fs-4">🛒 AGREGAR A LA LISTA</span>
+                                    <span class="small" style="font-size: 0.7rem; opacity: 0.8;">(Guardar en carrito temporal)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 🛒 NUEVO COMPONENTE: LISTADO DEL CARRITO COMPLETO -->
+                <div class="card rounded-0 border-dark shadow-sm">
+                    <div class="card-header bg-secondary text-white rounded-0 fw-bold text-uppercase small py-2">
+                        Artículos en la Venta Actual
+                    </div>
+                    <div class="card-body p-0 bg-white">
+                        <div class="tabla-contenedor">
+                            <table class="table table-striped table-hover mb-0 align-middle">
+                                <thead class="table-dark sticky-top small text-uppercase">
+                                    <tr>
+                                        <th class="ps-3">Artículo</th>
+                                        <th class="text-center">Cant.</th>
+                                        <th class="text-end">P. Unit</th>
+                                        <th class="text-end">Desc.</th>
+                                        <th class="text-end">Subtotal</th>
+                                        <th class="text-center" style="width: 60px;">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuerpo-carrito" class="small fw-bold">
+                                    <!-- Filas generadas dinámicamente por JavaScript -->
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4 fw-normal">Ningún artículo agregado a la lista.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VISOR DE ARTÍCULO Y VISOR DIGITAL (DERECHA) -->
+            <div class="col-lg-5">
+                <div class="card rounded-0 border-dark shadow-sm h-100 bg-light">
+                    <div class="card-header bg-secondary text-white rounded-0 fw-bold text-uppercase">
+                        Visor de Artículo
+                    </div>
+                    <div class="card-body p-4 d-flex flex-column">
+                        
+                        <div class="visor-imagen border border-dark mb-3 p-3 shadow-sm d-flex justify-content-center align-items-center" style="height: 180px;">
+                            <img id="imgV" src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=300" alt="Vista del Producto" class="img-fluid border shadow-sm bg-white p-2" style="max-height: 100%; object-fit: contain;">
+                        </div>
+                        
+                        <div class="pantalla-digital p-4 text-center mb-3">
+                            <div class="mb-3">
+                                <span class="d-block text-secondary fw-bold text-uppercase" style="letter-spacing: 2px; font-size: 0.8rem;">TOTAL DE LA COMPRA</span>
+                                <div class="display-3 fw-bold text-success texto-digital lh-1 mt-1" id="pV">S/ 0.00</div>
+                            </div>
+                            <hr class="border-secondary opacity-50 my-3">
+                            <div>
+                                <span class="d-block text-secondary fw-bold text-uppercase" style="letter-spacing: 2px; font-size: 0.8rem;">STOCK EN TIENDA (SELECCIONADO)</span>
+                                <div class="display-6 fw-bold text-info texto-digital lh-1 mt-1" id="sV">0</div>
+                            </div>
+                        </div>
+
+                        <!-- Botón Maestro para procesar la transacción completa hacia el Backend -->
+                        <button class="btn btn-success btn-lg w-100 rounded-0 fw-bold text-uppercase boton-industrial py-3 mt-auto" onclick="procesarCobroFinal()">
+                            <span class="d-block fs-4">💵 COBRAR Y EMITIR TICKET</span>
+                            <span class="small" style="font-size: 0.7rem; opacity: 0.9;">(Ejecutar Transacción ACID en DB)</span>
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js?v=21"></script>
+</body>
+</html>
