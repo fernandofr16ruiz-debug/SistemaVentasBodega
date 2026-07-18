@@ -4,5 +4,5 @@ db_data/
 .vscode/
 .DS_Store
 Thumbs.db
-/home/frasus/Proyectos/SistemaVentasBodega/evaluar-proyecto.md
-/home/frasus/Proyectos/SistemaVentasBodega/reporte-refactorizacion.md
+evaluar-proyecto.md
+reporte-refactorizacion.md
