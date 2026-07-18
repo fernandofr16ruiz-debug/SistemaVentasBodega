@@ -22,6 +22,11 @@ const UsuariosModel = {
             [nombre_completo, username, password, rol || 'cajero']
         );
         return result.insertId;
+    },
+
+    eliminar: async (id) => {
+        const [result] = await db.execute('DELETE FROM usuarios WHERE id = ?', [id]);
+        return result.affectedRows > 0;
     }
 };
 

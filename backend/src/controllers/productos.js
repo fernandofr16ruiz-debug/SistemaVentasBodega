@@ -78,6 +78,27 @@ const productosController = {
             console.error('Error en actualizarProducto:', error);
             res.status(500).json({ error: 'Error interno al actualizar el producto' });
         }
+    },
+
+    eliminarProducto: async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            const productoExistente = await ProductosModel.obtenerPorId(id);
+            if (!productoExistente) {
+                return res.status(404).json({ error: 'El producto no existe en el catálogo' });
+            }
+
+            await ProductosModel.eliminar(id);
+            res.status(200).json({ success: true, mensaje: 'Producto eliminado correctamente' });
+        } catch (error) {
+            console.error('Error en eliminarProducto:', error);
+            // ER_ROW_IS_REFERENCED_2 (error code 1451) represents foreign key delete restriction
+            if (error.code === 'ER_ROW_IS_REFERENCED_2' || error.errno === 1451) {
+                return res.status(400).json({ error: 'No se puede eliminar el producto porque registra ventas históricas.' });
+            }
+            res.status(500).json({ error: 'Error interno al eliminar el producto' });
+        }
     }
 };
 

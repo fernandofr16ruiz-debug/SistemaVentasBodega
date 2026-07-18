@@ -183,7 +183,7 @@ async function operar(tipo) {
 
         const payload = {
             total: totalFinal,
-            usuario_id: 1, 
+            usuario_id: parseInt(localStorage.getItem('usuarioId')) || 1, 
             productos: [{ 
                 producto_id: itemSeleccionadoCaja.id, 
                 cantidad: cant, 
@@ -330,6 +330,7 @@ async function login() {
         if (response.ok && result.success) {
             localStorage.setItem('rol', result.usuario.rol);
             localStorage.setItem('nombreUsuario', result.usuario.nombre);
+            localStorage.setItem('usuarioId', result.usuario.id);
 
             if(result.usuario.rol === 'administrador') {
                 window.location.href = 'inventario.html';
@@ -389,5 +390,6 @@ async function eliminarUsuario(id) {
 function cerrarSesion() {
     localStorage.removeItem('rol');
     localStorage.removeItem('nombreUsuario');
+    localStorage.removeItem('usuarioId');
     window.location.href = 'index.html'; 
 }

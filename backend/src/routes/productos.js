@@ -8,5 +8,6 @@ router.post('/', productosController.crearProducto);       // POST /api/producto
 router.put('/:id/stock', productosController.modificarStock); // PUT /api/productos/id/stock
 
 router.put('/:id', productosController.actualizarProducto); // PUT /api/productos/:id
+router.delete('/:id', productosController.eliminarProducto); // DELETE /api/productos/:id
 
 module.exports = router;
