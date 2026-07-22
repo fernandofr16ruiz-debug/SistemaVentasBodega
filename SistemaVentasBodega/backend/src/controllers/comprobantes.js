@@ -1,6 +1,7 @@
 const ComprobantesModel = require('../models/comprobantes');
 const VentasModel = require('../models/ventas');
-const ClientesModel = require('../models/clientes');
+// Clientes model is not used in ERP-only flows here; keep import commented for future reference
+// const ClientesModel = require('../models/clientes');
 
 const ComprobantesController = {
     // GENERAR COMPROBANTE

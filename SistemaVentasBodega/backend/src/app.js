@@ -13,8 +13,6 @@ const productosRoutes = require('./routes/productos');
 const ventasRoutes = require('./routes/ventas');
 const proveedoresRoutes = require('./routes/proveedores');
 
-// Nuevas rutas para funcionalidades adicionales
-const autenticacionRoutes = require('./routes/autenticacion');
 const pagosRoutes = require('./routes/pagos');
 const comprobantesRoutes = require('./routes/comprobantes');
 
@@ -25,7 +23,7 @@ app.use('/api/ventas', ventasRoutes);
 app.use('/api/proveedores', proveedoresRoutes);
 
 // Nuevas rutas
-app.use('/api/autenticacion', autenticacionRoutes);
+// Client-facing authentication removed for ERP-only. Keep employee auth via /api/usuarios.
 app.use('/api/pagos', pagosRoutes);
 app.use('/api/comprobantes', comprobantesRoutes);
 

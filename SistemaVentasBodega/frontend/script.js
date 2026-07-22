@@ -41,22 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(document.getElementById('tabla-facturas')) cargarFacturas();
     if(document.getElementById('tabla-usuarios')) cargarUsuarios();
 
-    // Nombre en el POS (Cajero)
     const op = document.getElementById('nombre-operador');
     if(op) {
         let nombreCajero = localStorage.getItem('nombreUsuario') || 'CAJERO';
         nombreCajero = nombreCajero.replace(/MAÃ±ANA/ig, 'MAÑANA').replace(/Ã±/g, 'ñ');
         op.innerText = 'OPERADOR: ' + nombreCajero.toUpperCase();
-    }
-
-    // Validación y Nombre en la Tienda Virtual (Cliente)
-    const nomCliente = document.getElementById('nombreClienteActivo');
-    if(nomCliente) {
-        nomCliente.innerText = localStorage.getItem('nombreUsuario') || 'Invitado';
-        if(!localStorage.getItem('usuarioId')) {
-            alert("Debes iniciar sesión para comprar.");
-            window.location.href = 'index.html';
-        }
     }
 });
 
@@ -146,123 +135,6 @@ async function eliminarProducto(id) {
         if(!response.ok) alert("No se puede eliminar un producto con historial de ventas.");
         cargarProductos(); 
     }
-}
-
-// ==========================================
-// 2. LÓGICA DE TIENDA VIRTUAL (CLIENTE)
-// ==========================================
-function renderizarTienda(categoriaBuscada = 'Todas') {
-    const grid = document.getElementById('gridProductosTienda');
-    const listaCategorias = document.getElementById('listaCategoriasTienda');
-    if(!grid) return;
-
-    if(listaCategorias.children.length <= 1) {
-        listaCategorias.innerHTML = `<li class="list-group-item"><button type="button" class="btn btn-link text-decoration-none text-dark w-100 text-start fw-bold" onclick="renderizarTienda('Todas')">Mostrar Todos</button></li>`;
-        const cats = [...new Set(db.map(item => item.categoria || 'Abarrotes'))];
-        cats.forEach(cat => {
-            listaCategorias.innerHTML += `<li class="list-group-item"><button type="button" class="btn btn-link text-decoration-none text-dark w-100 text-start text-uppercase" onclick="renderizarTienda('${cat}')">${cat}</button></li>`;
-        });
-    }
-
-    let filtrados = categoriaBuscada !== 'Todas' ? db.filter(i => (i.categoria || 'Abarrotes') === categoriaBuscada) : db;
-    grid.innerHTML = '';
-
-    filtrados.forEach(p => {
-        grid.innerHTML += `
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm product-card">
-                    <img src="${p.img || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300'}" class="card-img-top rounded-top" alt="${p.nombre}">
-                    <div class="card-body d-flex flex-column">
-                        <span class="badge bg-secondary mb-2 align-self-start text-uppercase">${p.categoria || 'Abarrotes'}</span>
-                        <h5 class="card-title fw-bold text-dark mb-1">${p.nombre}</h5>
-                        <h4 class="text-success fw-bold mt-auto mb-3">S/ ${parseFloat(p.precio).toFixed(2)}</h4>
-                        <button type="button" class="btn btn-dark w-100 fw-bold btn-moderno" onclick="agregarAlCarritoTienda(${p.id})">Agregar al Pedido</button>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-}
-
-function agregarAlCarritoTienda(idProducto) {
-    const producto = db.find(p => parseInt(p.id) === parseInt(idProducto));
-    if (!producto) return;
-    if (producto.stock <= 0) return alert("Producto agotado.");
-
-    const existe = carrito.find(item => parseInt(item.producto_id) === parseInt(producto.id));
-    if (existe) {
-        if ((existe.cantidad + 1) > producto.stock) return alert("No hay más stock disponible de este producto.");
-        existe.cantidad += 1;
-        existe.subtotal = existe.cantidad * existe.precio_unitario;
-    } else {
-        carrito.push({
-            producto_id: producto.id,
-            nombre: producto.nombre,
-            cantidad: 1,
-            precio_unitario: parseFloat(producto.precio),
-            descuento_aplicado: 0,
-            subtotal: parseFloat(producto.precio)
-        });
-    }
-    
-    actualizarSidebarTienda();
-    if(!document.getElementById('cartSidebar').classList.contains('open')) toggleCart(); 
-}
-
-function cambiarCantidadTienda(index, delta) {
-    const item = carrito[index];
-    const prodDB = db.find(p => parseInt(p.id) === parseInt(item.producto_id));
-    let nuevaCant = item.cantidad + delta;
-    if(nuevaCant <= 0) {
-        carrito.splice(index, 1);
-    } else {
-        if(prodDB && nuevaCant > prodDB.stock) return alert("Stock máximo alcanzado.");
-        item.cantidad = nuevaCant;
-        item.subtotal = item.cantidad * item.precio_unitario;
-    }
-    actualizarSidebarTienda();
-}
-
-function actualizarSidebarTienda() {
-    const cont = document.getElementById('carritoItemsTienda');
-    const badge = document.getElementById('cartBadge');
-    const totalDiv = document.getElementById('totalCarritoTienda');
-    if(!cont) return;
-
-    let totalItems = 0;
-    totalGlobalVenta = 0;
-    cont.innerHTML = '';
-
-    if (carrito.length === 0) {
-        cont.innerHTML = '<p class="text-center text-muted mt-5">Tu carrito está vacío.</p>';
-    } else {
-        carrito.forEach((item, idx) => {
-            totalItems += item.cantidad;
-            totalGlobalVenta += item.subtotal;
-            cont.innerHTML += `
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
-                    <div>
-                        <h6 class="fw-bold mb-1">${item.nombre}</h6>
-                        <small class="text-success fw-bold">S/ ${item.precio_unitario.toFixed(2)}</small>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 fw-bold" onclick="cambiarCantidadTienda(${idx}, -1)">-</button>
-                        <span class="fw-bold px-1">${item.cantidad}</span>
-                        <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 fw-bold" onclick="cambiarCantidadTienda(${idx}, 1)">+</button>
-                    </div>
-                </div>
-            `;
-        });
-    }
-    badge.innerText = totalItems;
-    totalDiv.innerText = `S/ ${totalGlobalVenta.toFixed(2)}`;
-}
-
-function toggleCart() {
-    const sidebar = document.getElementById('cartSidebar');
-    const overlay = document.getElementById('cartOverlay');
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('show');
 }
 
 // ==========================================
@@ -388,13 +260,6 @@ function abrirModalNativo(idModal) {
     }, 400); 
 }
 
-function iniciarPagoTienda() {
-    if(carrito.length === 0) return alert("Tu pedido está vacío.");
-    toggleCart(); 
-    document.getElementById('totalPagoModal').innerText = `S/ ${totalGlobalVenta.toFixed(2)}`;
-    abrirModalNativo('modalPago');
-}
-
 function iniciarProcesoCobro() {
     if (carrito.length === 0) return alert("La lista de venta está vacía.");
     document.getElementById('totalPagoModal').innerText = `S/ ${totalGlobalVenta.toFixed(2)}`;
@@ -501,8 +366,31 @@ async function generarComprobanteFinal() {
     };
 
     try {
-        await postJSON('/pagos/procesar', payload);
-    } catch (e) { console.warn("Modo demo local activo."); }
+        const ventaPayload = {
+            total: totalGlobalVenta,
+            usuario_id: parseInt(usuarioId),
+            productos: carrito.map(item => ({ producto_id: item.producto_id, cantidad: item.cantidad, precio: item.precio_unitario }))
+        };
+        const { response: ventaResponse, data: ventaData } = await postJSON('/ventas', ventaPayload);
+        if (!ventaResponse.ok) {
+            throw new Error(ventaData?.error || 'No se pudo registrar la venta en el sistema.');
+        }
+        if (document.getElementById('tabla-facturas')) cargarFacturas();
+        await postJSON('/pagos/procesar', {
+            venta_id: ventaData.venta_id,
+            cliente_id: null,
+            metodo_pago_id: null,
+            monto: totalGlobalVenta,
+            detalles_adicionales: {
+                tipo_comprobante: tipoComprobante,
+                cliente_nombre: nombre,
+                cliente_dni: dni,
+                metodo: metodoPagoSeleccionado
+            }
+        });
+    } catch (e) {
+        console.warn('No se pudo completar el registro de pago o venta en backend:', e.message || e);
+    }
 
     abrirModalNativo('modalTicketFinal');
 }
@@ -521,6 +409,249 @@ function finalizarVentaYLimpiar() {
     cargarProductos(); 
     const modalInstance = bootstrap.Modal.getInstance(document.getElementById('modalTicketFinal'));
     if (modalInstance) modalInstance.hide();
+}
+
+// ==========================================
+// 4.1 MÓDULO DE PROVEEDORES / FACTURACIÓN / USUARIOS
+// ==========================================
+async function cargarProveedores() {
+    const tbody = document.getElementById('tabla-proveedores');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4"><span class="spinner-border spinner-border-sm"></span> Cargando proveedores...</td></tr>';
+
+    try {
+        const { response, data } = await apiRequest('GET', '/proveedores');
+        if (!response.ok) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">No se pudo cargar los proveedores.</td></tr>';
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No hay proveedores registrados.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.map(proveedor => `
+            <tr>
+                <td class="text-center">${proveedor.ruc || '-'}</td>
+                <td>${proveedor.empresa || '-'}</td>
+                <td>${proveedor.representante || '-'}</td>
+                <td>${proveedor.telefono || '-'}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarProveedor(${proveedor.id})">Eliminar</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('Error cargarProveedores:', error);
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar los proveedores.</td></tr>';
+    }
+}
+
+async function guardarNuevoProveedor() {
+    const ruc = document.getElementById('provRuc')?.value.trim();
+    const empresa = document.getElementById('provEmpresa')?.value.trim();
+    const representante = document.getElementById('provRep')?.value.trim();
+    const telefono = document.getElementById('provTel')?.value.trim();
+
+    if (!ruc || !empresa) {
+        return alert('RUC y Empresa son obligatorios.');
+    }
+
+    try {
+        const { response, data } = await postJSON('/proveedores', { ruc, empresa, representante, telefono, estado: 'Activo' });
+        if (!response.ok) {
+            return alert(data?.error || 'No se pudo registrar el proveedor.');
+        }
+
+        alert('Proveedor registrado correctamente.');
+        document.getElementById('provRuc').value = '';
+        document.getElementById('provEmpresa').value = '';
+        document.getElementById('provRep').value = '';
+        document.getElementById('provTel').value = '';
+        cargarProveedores();
+    } catch (error) {
+        console.error('Error guardarNuevoProveedor:', error);
+        alert('Error de conexión al registrar proveedor.');
+    }
+}
+
+async function eliminarProveedor(id) {
+    if (!confirm('¿Estás seguro de eliminar este proveedor?')) return;
+    try {
+        const { response, data } = await apiRequest('DELETE', `/proveedores/${id}`);
+        if (!response.ok) {
+            return alert(data?.error || 'No se pudo eliminar el proveedor.');
+        }
+        alert('Proveedor eliminado correctamente.');
+        cargarProveedores();
+    } catch (error) {
+        console.error('Error eliminarProveedor:', error);
+        alert('Error de conexión al eliminar proveedor.');
+    }
+}
+
+async function cargarFacturas() {
+    const tbody = document.getElementById('tabla-facturas');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4"><span class="spinner-border spinner-border-sm"></span> Cargando facturas...</td></tr>';
+
+    try {
+        const { response, data } = await apiRequest('GET', '/ventas');
+        if (!response.ok) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">No se pudo cargar las facturas.</td></tr>';
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No hay facturas registradas.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.map(venta => `
+            <tr>
+                <td>${venta.codigo_tx || '-'}</td>
+                <td>${venta.fecha_formato || '-'}</td>
+                <td>${venta.operador || '-'}</td>
+                <td class="text-end">S/ ${parseFloat(venta.total || 0).toFixed(2)}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="verDetalleVenta(${venta.id})">Ver detalle</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('Error cargarFacturas:', error);
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar las facturas.</td></tr>';
+    }
+}
+
+async function verDetalleVenta(id) {
+    const modalBody = document.getElementById('modalDetalleCuerpo');
+    if (!modalBody) return;
+
+    modalBody.innerHTML = '<div class="text-center py-4"><span class="spinner-border spinner-border-sm"></span> Cargando detalle...</div>';
+    abrirModalNativo('modalTicket');
+
+    try {
+        const { response, data } = await apiRequest('GET', `/ventas/${id}/detalle`);
+        if (!response.ok) {
+            modalBody.innerHTML = '<div class="text-danger text-center py-4">No se pudo cargar el detalle de la venta.</div>';
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            modalBody.innerHTML = '<div class="text-muted text-center py-4">Esta venta no tiene detalles registrados.</div>';
+            return;
+        }
+
+        modalBody.innerHTML = `
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unit.</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(fila => `
+                            <tr>
+                                <td>${fila.producto}</td>
+                                <td class="text-center">${fila.cantidad}</td>
+                                <td class="text-end">S/ ${parseFloat(fila.precio_unitario || 0).toFixed(2)}</td>
+                                <td class="text-end">S/ ${parseFloat(fila.subtotal || 0).toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error verDetalleVenta:', error);
+        modalBody.innerHTML = '<div class="text-danger text-center py-4">Error al cargar el detalle de la venta.</div>';
+    }
+}
+
+async function cargarUsuarios() {
+    const tbody = document.getElementById('tabla-usuarios');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4"><span class="spinner-border spinner-border-sm"></span> Cargando usuarios...</td></tr>';
+
+    try {
+        const { response, data } = await apiRequest('GET', '/usuarios');
+        if (!response.ok) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">No se pudo cargar los usuarios.</td></tr>';
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No hay usuarios registrados.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.map(usuario => `
+            <tr>
+                <td class="text-center">${usuario.id}</td>
+                <td>${usuario.nombre_completo || usuario.nombre || '-'}</td>
+                <td>${usuario.username || '-'}</td>
+                <td class="text-capitalize">${usuario.rol || '-'}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarUsuario(${usuario.id})">Eliminar</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error('Error cargarUsuarios:', error);
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error al cargar los usuarios.</td></tr>';
+    }
+}
+
+async function guardarNuevoUsuario() {
+    const nombre = document.getElementById('usrNombre')?.value.trim();
+    const username = document.getElementById('usrUser')?.value.trim();
+    const password = document.getElementById('usrPass')?.value.trim();
+    const rol = document.getElementById('usrRol')?.value || 'cajero';
+
+    if (!nombre || !username || !password) {
+        return alert('Completa todos los campos para crear un usuario.');
+    }
+
+    try {
+        const { response, data } = await postJSON('/usuarios', { nombre_completo: nombre, username, password, rol });
+        if (!response.ok) {
+            return alert(data?.error || 'No se pudo crear el usuario.');
+        }
+
+        alert('Usuario creado correctamente.');
+        document.getElementById('usrNombre').value = '';
+        document.getElementById('usrUser').value = '';
+        document.getElementById('usrPass').value = '';
+        document.getElementById('usrRol').value = 'cajero';
+        cargarUsuarios();
+    } catch (error) {
+        console.error('Error guardarNuevoUsuario:', error);
+        alert('Error de conexión al crear el usuario.');
+    }
+}
+
+async function eliminarUsuario(id) {
+    if (!confirm('¿Estás seguro de eliminar este usuario?')) return;
+    try {
+        const { response, data } = await apiRequest('DELETE', `/usuarios/${id}`);
+        if (!response.ok) {
+            return alert(data?.error || 'No se pudo eliminar el usuario.');
+        }
+        alert('Usuario eliminado correctamente.');
+        cargarUsuarios();
+    } catch (error) {
+        console.error('Error eliminarUsuario:', error);
+        alert('Error de conexión al eliminar usuario.');
+    }
 }
 
 // ==========================================
@@ -572,36 +703,7 @@ function abrirModal(idModalDestino) {
     }, 400); 
 }
 
-async function simularLoginFacebook() {
-    const btnText = document.getElementById('btn-fb-text');
-    if (btnText) btnText.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Conectando...';
-
-    try {
-        const { response, data } = await postJSON('/autenticacion/registro/facebook', {
-            nombre_completo: 'Cliente Facebook',
-            correo: 'cliente_facebook@bodegapro.local',
-            token_facebook: 'simulado'
-        });
-
-        if (btnText) btnText.innerHTML = 'Continúa con Facebook';
-        if (!response.ok) {
-            return alert(`Error: ${data?.error || 'No se pudo iniciar sesión con Facebook.'}`);
-        }
-
-        if (!data.cliente) {
-            return alert('No se pudo obtener la información de cliente desde Facebook.');
-        }
-
-        localStorage.setItem('usuarioId', data.cliente.id);
-        localStorage.setItem('nombreUsuario', data.cliente.nombre_completo || data.cliente.correo || 'Cliente Facebook');
-        localStorage.setItem('rol', 'cliente');
-        window.location.href = 'tienda.html';
-    } catch (error) {
-        console.error(error);
-        if (btnText) btnText.innerHTML = 'Continúa con Facebook';
-        alert('Error de conexión con el servidor.');
-    }
-}
+// Removed client-side social login helper (ERP-only)
 
 function simularRecuperacion() {
     const dato = document.getElementById('recDato').value?.trim();
@@ -627,84 +729,9 @@ function simularRecuperacion() {
     })();
 }
 
-async function procesarLoginLocal() {
-    const isCorreo = document.getElementById('tab-correo').classList.contains('active');
-    const valor = isCorreo ? (document.getElementById('logCorreo').value || '').trim() : (document.getElementById('logCelular').value || '').trim();
-    const password = document.getElementById('logPass').value || '';
+// Client login handlers removed — employees should use /login.html which calls `login()`.
 
-    if (!valor || !password) return alert('Por favor, completa todos los campos.');
-
-    const endpoint = isCorreo ? '/autenticacion/login/correo' : '/autenticacion/login/celular';
-    const bodyData = isCorreo ? { correo: valor, contrasena: password } : { celular: valor, contrasena: password };
-
-    try {
-        const { response, data } = await postJSON(endpoint, bodyData);
-
-        if (response.ok) {
-            // Backend returns 'cliente' object for autenticacion routes
-            if (data.cliente) {
-                localStorage.setItem('usuarioId', data.cliente.id);
-                localStorage.setItem('nombreUsuario', data.cliente.nombre_completo || data.cliente.nombre || 'Cliente');
-                localStorage.setItem('rol', 'cliente');
-                window.location.href = 'tienda.html';
-                return;
-            }
-
-            // Fallback: if backend returned usuario (legacy)
-            if (data.usuario) {
-                localStorage.setItem('usuarioId', data.usuario.id);
-                localStorage.setItem('nombreUsuario', data.usuario.nombre || data.usuario.nombre_completo || 'Usuario');
-                localStorage.setItem('rol', data.usuario.rol || 'empleado');
-                window.location.href = data.usuario.rol === 'cliente' ? 'tienda.html' : 'sistema.html';
-                return;
-            }
-
-            alert('Inicio de sesión exitoso. Redirigiendo...');
-        } else {
-            alert(data.error || 'Credenciales inválidas');
-        }
-    } catch (error) {
-        console.error(error);
-        alert('Error de conexión con el servidor.');
-    }
-}
-
-async function procesarRegistro() {
-    const isCorreo = document.getElementById('tab-reg-correo').classList.contains('active');
-    let endpoint = '';
-    let bodyData = {};
-
-    if (isCorreo) {
-        const nombre = (document.getElementById('regNombreCorreo').value || '').trim();
-        const correo = (document.getElementById('regCorreo').value || '').trim();
-        const password = document.getElementById('regPassCorreo').value || '';
-        if (!nombre || !correo || !password) return alert('Por favor completa tu nombre, correo y contraseña.');
-        if (!validarCorreo(correo)) return alert('Por favor ingresa un correo válido.');
-        if (!validarPassword(password)) return alert('La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número.');
-        endpoint = '/autenticacion/registro/correo';
-        bodyData = { nombre_completo: nombre, correo, contrasena: password };
-    } else {
-        const nombre = (document.getElementById('regNombreCelular').value || '').trim();
-        const celular = (document.getElementById('regCelular').value || '').trim();
-        const password = document.getElementById('regPassCelular').value || '';
-        if (!nombre || !celular || !password) return alert('Por favor completa tu nombre, celular y contraseña.');
-        if (!validarCelular(celular)) return alert('Por favor ingresa un número de celular válido (9 dígitos).');
-        if (!validarPassword(password)) return alert('La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número.');
-        endpoint = '/autenticacion/registro/celular';
-        bodyData = { nombre_completo: nombre, celular, contrasena: password };
-    }
-
-    try {
-        const { response, data } = await postJSON(endpoint, bodyData);
-        if (response.ok) {
-            alert("Cuenta creada exitosamente. Ahora puedes iniciar sesión.");
-            document.querySelectorAll('#modalRegistro input').forEach(input => input.value = '');
-            abrirModal('modalLogin');
-        } else {
-            alert(`Error al registrar: ${data?.error || 'El usuario ya existe'}`);
-        }
-    } catch (error) { alert("Error de conexión al intentar registrar."); }
-}
+// Client registration removed for ERP-only deployment.
 
 // ==========================================
 // Helpers: validación de correo/celular/contraseña
@@ -762,4 +789,71 @@ function verificarAlertas() {
     if (!cont) return;
     cont.innerHTML = ''; 
     db.filter(i => i.stock <= 10).forEach(p => { cont.innerHTML += `<div class="alert alert-danger border-danger border-2 shadow-sm mb-2"><strong>[ALERTA SISTEMA]</strong> Artículo ${p.nombre} con stock crítico: ${p.stock} unid.</div>`; });
+}
+
+// Renderiza KPIs y gráficas del módulo Reportes (Dashboard)
+async function renderGrafica() {
+    try {
+        // KPIs básicos desde productos cargados
+        const kpiProductos = document.getElementById('kpi-productos');
+        const kpiCritico = document.getElementById('kpi-critico');
+        const kpiTx = document.getElementById('kpi-ventas-tx');
+        const kpiDinero = document.getElementById('kpi-ventas-dinero');
+
+        if (kpiProductos) kpiProductos.innerText = (db || []).length;
+        if (kpiCritico) kpiCritico.innerText = (db || []).filter(p => p.stock <= 10).length;
+
+        // Ventas: contar tickets y sumar totales
+        try {
+            const { response, data } = await apiRequest('GET', '/ventas');
+            if (response.ok && Array.isArray(data)) {
+                const totalTickets = data.length;
+                const totalIngresos = data.reduce((s, v) => s + (parseFloat(v.total) || 0), 0);
+                if (kpiTx) kpiTx.innerText = totalTickets;
+                if (kpiDinero) kpiDinero.innerText = `S/ ${totalIngresos.toFixed(2)}`;
+            }
+        } catch (e) { console.error('Error cargando ventas para KPIs:', e); }
+
+        // Gráfica de barras: Top productos (desde endpoint de ventas)
+        try {
+            const { response, data } = await apiRequest('GET', '/ventas/reportes/top');
+            if (response.ok && Array.isArray(data)) {
+                const labels = data.map(r => r.producto);
+                const valores = data.map(r => parseFloat(r.total_recaudado) || 0);
+
+                // destruir gráfico previo si existe
+                if (window._chartBar) { window._chartBar.destroy(); window._chartBar = null; }
+                const ctx = document.getElementById('graficaBarras');
+                if (ctx) {
+                    window._chartBar = new Chart(ctx, {
+                        type: 'bar',
+                        data: { labels, datasets: [{ label: 'Ingresos S/', data: valores, backgroundColor: '#0d6efd' }] },
+                        options: { responsive: true, maintainAspectRatio: false }
+                    });
+                }
+            }
+        } catch (e) { console.error('Error cargando top productos:', e); }
+
+        // Gráfica de torta: distribución por categoría/familia (desde db cargada)
+        try {
+            const cats = {};
+            (db || []).forEach(p => { const c = (p.categoria || 'Sin categoría').toString(); cats[c] = (cats[c] || 0) + 1; });
+            const labels = Object.keys(cats);
+            const valores = labels.map(l => cats[l]);
+
+            if (window._chartPie) { window._chartPie.destroy(); window._chartPie = null; }
+            const ctxPie = document.getElementById('graficaTorta');
+            if (ctxPie) {
+                const colors = labels.map((_, i) => `hsl(${(i * 45) % 360} 70% 50%)`);
+                window._chartPie = new Chart(ctxPie, {
+                    type: 'pie',
+                    data: { labels, datasets: [{ data: valores, backgroundColor: colors }] },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }
+        } catch (e) { console.error('Error calculando distribución de familias:', e); }
+
+    } catch (error) {
+        console.error('Error en renderGrafica:', error);
+    }
 }
