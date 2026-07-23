@@ -25,8 +25,8 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end border-dark rounded-0">
                         <li><h6 class="dropdown-header">Seguridad</h6></li>
-                        <li><a class="dropdown-item" href="#" onclick="cambiarClaves('admin')">Modificar Credenciales Admin</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="cambiarClaves('cajero')">Modificar Credenciales Cajero</a></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCredenciales" onclick="document.getElementById('tipoUsuario').value='admin'">Modificar Credenciales Admin</a></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#modalCredenciales" onclick="document.getElementById('tipoUsuario').value='cajero'">Modificar Credenciales Cajero</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger fw-bold" href="index.html" onclick="cerrarSesion()">Cerrar Sesión</a></li>
                     </ul>
@@ -80,6 +80,33 @@
                     </thead>
                     <tbody id="tabla-datos"></tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CAMBIO DE CREDENCIALES -->
+    <div class="modal fade" id="modalCredenciales" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-dark rounded-0">
+                <div class="modal-header bg-dark text-white rounded-0">
+                    <h5 class="modal-title fw-bold">Cambiar Credenciales</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="tipoUsuario" value="">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nueva Contraseña:</label>
+                        <input type="password" id="nuevaContrasena" class="form-control border-dark rounded-0" placeholder="Mínimo 3 caracteres">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Confirmar Contraseña:</label>
+                        <input type="password" id="confirmarContrasena" class="form-control border-dark rounded-0" placeholder="Repita la contraseña">
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-dark">
+                    <button type="button" class="btn btn-secondary rounded-0" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary rounded-0 fw-bold" onclick="procesarCambioCredenciales()">Actualizar Contraseña</button>
+                </div>
             </div>
         </div>
     </div>

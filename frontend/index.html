@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bodega PRO | Tu tienda de confianza</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -21,15 +22,15 @@
                     <li class="nav-item"><a class="nav-link text-white" href="#logros">Objetivos</a></li>
                     <li class="nav-item"><a class="nav-link text-white" href="#contacto">Ubicación</a></li>
                 </ul>
-                <div class="d-flex">
-                    <a class="btn btn-danger fw-bold rounded-0" href="login.html">ACCESO EMPLEADOS (ERP)</a>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-danger fw-bold rounded-0 shadow-sm" href="login.html">ERP Empleados</a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <header class="hero-banner text-center">
-        <div class="container">
+    <header class="hero-banner text-center py-5 bg-light">
+        <div class="container py-5">
             <h1 class="display-4 fw-bold mb-3">Bienvenidos a Bodega PRO</h1>
             <p class="lead mb-4" style="max-width: 600px; margin: auto;">
                 Calidad, variedad y atención rápida. Todo lo que tu familia necesita, al alcance de la esquina.
@@ -40,10 +41,10 @@
     <section id="quienes-somos" class="container py-5">
         <div class="row align-items-center">
             <div class="col-md-6 mb-4 mb-md-0">
-                <img src="https://images.unsplash.com/photo-1534723452862-4c874018d66d?auto=format&fit=crop&w=600&q=80" alt="Interior de la Bodega" class="img-fluid border border-dark">
+                <img src="https://images.unsplash.com/photo-1534723452862-4c874018d66d?auto=format&fit=crop&w=600&q=80" alt="Interior de la Bodega" class="img-fluid border border-dark rounded">
             </div>
             <div class="col-md-6">
-                <h2 class="section-title">Quiénes Somos</h2>
+                <h2 class="section-title fw-bold">Quiénes Somos</h2>
                 <p class="text-secondary" style="text-align: justify;">
                     Somos un negocio local fundado con el propósito de abastecer a nuestra comunidad con productos de primera necesidad, abarrotes y artículos de limpieza. Nos enorgullece conocer a nuestros clientes por su nombre y ofrecer un trato humano y cercano.
                 </p>
@@ -53,14 +54,14 @@
                 </p>
                 <h4 class="fw-bold mt-3">Nuestra Visión</h4>
                 <p class="text-secondary">
-                    Convertirnos en el minimarket líder de nuestro distrito, implementando tecnología (como nuestro nuevo sistema de caja) para agilizar las colas y mejorar la experiencia de compra.
+                    Convertirnos en el minimarket líder de nuestro distrito, implementando tecnología para agilizar las colas y mejorar la experiencia de compra.
                 </p>
             </div>
         </div>
     </section>
 
     <section id="categorias" class="container py-5 border-top">
-        <h2 class="section-title text-center d-block mb-5">Lo que ofrecemos</h2>
+        <h2 class="section-title text-center d-block mb-5 fw-bold">Lo que ofrecemos</h2>
         <div class="row g-4">
             <div class="col-md-4">
                 <div class="card h-100 rounded-0 border border-secondary shadow-sm">
@@ -94,24 +95,24 @@
 
     <section id="logros" class="bg-white py-5 border-top border-bottom">
         <div class="container text-center">
-            <h2 class="section-title mb-5">Nuestros Logros</h2>
+            <h2 class="section-title mb-5 fw-bold">Nuestros Logros</h2>
             <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="tarjeta-logro">
+                    <div class="tarjeta-logro p-4">
                         <h1 class="display-5 fw-bold text-danger mb-2">+500</h1>
                         <h5 class="fw-bold">Productos en Catálogo</h5>
                         <p class="text-muted small m-0">Amplia variedad de marcas y presentaciones para cubrir todas tus necesidades.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="tarjeta-logro">
+                    <div class="tarjeta-logro p-4">
                         <h1 class="display-5 fw-bold text-danger mb-2">100%</h1>
                         <h5 class="fw-bold">Gestión Digital</h5>
                         <p class="text-muted small m-0">Contamos con un sistema ERP propio que garantiza que nunca nos quedemos sin stock.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="tarjeta-logro">
+                    <div class="tarjeta-logro p-4">
                         <h1 class="display-5 fw-bold text-danger mb-2">Top 1</h1>
                         <h5 class="fw-bold">Atención Rápida</h5>
                         <p class="text-muted small m-0">Nuestro módulo de Punto de Venta automatizado reduce el tiempo de espera en caja.</p>
@@ -122,10 +123,12 @@
     </section>
 
     <section id="contacto" class="container py-5">
-        <h2 class="section-title text-center d-block mb-5">Nuestra Ubicación</h2>
-        <div class="row bg-light border border-secondary p-0 m-0">
+        <h2 class="section-title text-center d-block mb-5 fw-bold">Nuestra Ubicación</h2>
+        <div class="row bg-light border border-secondary p-0 m-0 rounded overflow-hidden shadow-sm">
             <div class="col-md-7 p-0">
-                <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80" alt="Mapa de ubicación" class="img-fluid w-100" style="height: 100%; object-fit: cover;">
+                <div class="ratio ratio-16x9" style="height: 100%; min-height: 400px;">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3902.738150499696!2d-77.06530668461523!3d-12.020092991484918!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105cfa29a171d15%3A0x334bf475c7b3ec21!2sAv.%20Per%C3%BA%201234%2C%20San%20Mart%C3%ADn%20de%20Porres%2015101%2C%20Per%C3%BA!5e0!3m2!1ses!2spe!4v1689000000000!5m2!1ses!2spe" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
             </div>
             <div class="col-md-5 p-5 d-flex flex-column justify-content-center">
                 <h4 class="fw-bold mb-4">Visítanos</h4>
@@ -145,16 +148,18 @@
         </div>
     </section>
 
-    <footer class="bg-dark text-white text-center py-3 mt-4 border-top border-danger border-4">
+    <footer class="bg-dark text-white text-center py-4 mt-4 border-top border-danger border-4">
         <p class="m-0" style="font-size: 0.9rem;">&copy; 2026 Bodega PRO. Todos los derechos reservados. | Sistema de Gestión Interna.</p>
     </footer>
 
-    <a href="https://wa.me/51999999999?text=Hola%20Bodega%20PRO,%20quiero%20hacer%20una%20consulta" target="_blank" style="position: fixed; bottom: 30px; right: 30px; background-color: #25d366; color: white; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; text-decoration: none;">
+    <!-- WhatsApp Flotante -->
+    <a href="https://wa.me/51999999999?text=Hola%20Bodega%20PRO" target="_blank" style="position: fixed; bottom: 30px; right: 30px; background-color: #25d366; color: white; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; text-decoration: none;">
         <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" class="bi bi-whatsapp" viewBox="0 0 16 16">
             <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.005-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z"/>
         </svg>
     </a>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
 </body>
 </html>
